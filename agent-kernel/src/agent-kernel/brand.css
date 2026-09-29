@@ -80,12 +80,14 @@
   /* One typeface throughout, code included. */
   --font-mono: var(--font-sans);
 
-  /* ---- Shape --------------------------------------------------------------- */
-  --radius-panel: 16px;
-  --radius-inset: 12px;
-  --radius-control: 10px;
-  --radius-small: 6px;
-  --radius-pill: 9999px;
+  /* ---- Shape: small, crisp radii, as in the agent-kernel dashboard ------- */
+  /* Panels, stat cards, board columns, dialogs, the sign-in card. */
+  --radius-panel: 6px;
+  /* Buttons, fields, board cards, table rows shown as cards, banners, tooltips. */
+  --radius-control: 4px;
+  /* Pills, tags, counts, the box inside a stat card, icon tiles. */
+  --radius-small: 3px;
+  --radius-pill: 999px;
 
   /* ---- Depth and motion ---------------------------------------------------- */
   --shadow-pop: 0 24px 64px rgb(8 8 26 / 0.5);
