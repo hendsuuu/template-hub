@@ -1,0 +1,196 @@
+/*
+ * Design tokens for every template in this repository (Tailwind CSS v4).
+ *
+ * Import straight after Tailwind:
+ *
+ *   @import "tailwindcss";
+ *   @import "./brand.css";
+ *
+ * Two themes. Dark is the default; <html data-theme="light"> switches every
+ * semantic token to its light value. A template that styles itself with the
+ * semantic tokens gets both themes with no extra work.
+ *
+ * Rules that keep the palette honest:
+ *   - Tailwind's default colour palette is switched off, so only these colours
+ *     exist as utilities (`bg-panel`, `text-soft`, `border-line`, …).
+ *   - Components use the semantic tokens. The primitives are for the brand's
+ *     own fills and marks (an orange button, a status dot).
+ *   - Neutrals are white at opacity on dark and navy at opacity on light, never
+ *     grey values.
+ *   - Orange is the one accent, used at full strength: tints of it turn brown on
+ *     navy. On white it is too light to be words, so orange text is deep navy
+ *     in the light theme and the orange stays in fills, marks and underlines.
+ *   - Status colours carry meaning and nothing else: green for done, blue for
+ *     in progress, orange for "needs a person", red for failure.
+ *   - One typeface: Poppins. Bold headings, SemiBold subheadings and calls to
+ *     action, Medium body copy, Regular captions.
+ */
+
+@theme {
+  --color-*: initial;
+
+  /* ---- Primitives: brand-exact, do not alter ----------------------------- */
+  --color-white: #ffffff;
+  --color-navy: #252533;
+  --color-navy-deep: #0b0b4a;
+  --color-orange: #ff9522;
+  --color-orange-deep: #ff7300;
+  --color-green: #7ad4a3;
+  --color-blue: #498bca;
+
+  /* Status only. Error states have no brand value, so this is the one extension. */
+  --color-red: #ef4444;
+
+  /* ---- Semantic surfaces (dark; the light values are further down) ------- */
+  --color-app: #252533;
+  --color-panel: rgb(255 255 255 / 0.035);
+  --color-raised: rgb(255 255 255 / 0.05);
+  --color-hover: rgb(255 255 255 / 0.06);
+  --color-active: rgb(255 255 255 / 0.09);
+  /* A table header: a deeper navy, not a darker grey. */
+  --color-sunken: rgb(11 11 74 / 0.22);
+  /* Solid surfaces that float over the page: dialogs, drawers, tooltips, menus. */
+  --color-overlay: #2b2b3a;
+
+  /* ---- Semantic text ------------------------------------------------------- */
+  --color-fg: #ffffff;
+  --color-soft: rgb(255 255 255 / 0.72);
+  /* 0.58 keeps quiet text above 4.5:1 on every surface above. */
+  --color-quiet: rgb(255 255 255 / 0.58);
+  /* Words on an orange fill: deep navy. */
+  --color-on-orange: #0b0b4a;
+  --color-focus: #ff9522;
+
+  /* Status words: each hue lightened just enough to clear 4.5:1 on every surface and label fill it sits on. */
+  --color-blue-text: #75b8fa;
+  --color-green-text: #7ad4a3;
+  --color-orange-text: #ff9b39;
+  --color-red-text: #fca5a5;
+  /* Green for dots, bars and marks (the other hues keep their brand value). */
+  --color-green-mark: #7ad4a3;
+
+  /* ---- Semantic lines ------------------------------------------------------ */
+  --color-line: rgb(255 255 255 / 0.09);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+  --color-line-active: rgb(255 255 255 / 0.18);
+  --color-line-hover: rgb(255 255 255 / 0.26);
+
+  /* ---- Type ---------------------------------------------------------------- */
+  --font-sans: var(--font-poppins, "Poppins"), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* One typeface throughout, code included. */
+  --font-mono: var(--font-sans);
+
+  /* ---- Shape --------------------------------------------------------------- */
+  --radius-panel: 16px;
+  --radius-inset: 12px;
+  --radius-control: 10px;
+  --radius-small: 6px;
+  --radius-pill: 9999px;
+
+  /* ---- Depth and motion ---------------------------------------------------- */
+  --shadow-pop: 0 24px 64px rgb(8 8 26 / 0.5);
+  --shadow-float: 0 8px 24px rgb(8 8 26 / 0.4);
+  --ease-brand: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* ---- Gradients (use sparingly: one restrained surface per screen) ------- */
+  --gradient-navy: linear-gradient(160deg, #252533 0%, #0b0b4a 100%);
+  --gradient-orange: linear-gradient(135deg, #ff9522 0%, #ff7300 100%);
+}
+
+/*
+ * The light theme: white panels on a faint navy page, navy words, navy lines.
+ * The status words are the brand hues taken darker, keeping hue and chroma,
+ * until they clear 4.5:1 on white and on their own tints, hovered rows included. Green marks go darker
+ * too: brand green is 1.8:1 on white, #187c50 is 5.2:1 and stays apart from
+ * red for colour-blind readers (deutan ΔE 15, dark theme 16).
+ */
+@layer theme {
+  :root[data-theme="light"] {
+    --color-app: #f5f5f9;
+    --color-panel: #ffffff;
+    --color-raised: rgb(11 11 74 / 0.035);
+    --color-hover: rgb(11 11 74 / 0.045);
+    --color-active: rgb(11 11 74 / 0.075);
+    --color-sunken: rgb(11 11 74 / 0.035);
+    --color-overlay: #ffffff;
+
+    --color-fg: #252533;
+    --color-soft: rgb(37 37 51 / 0.78);
+    --color-quiet: rgb(37 37 51 / 0.66);
+    --color-focus: #0b0b4a;
+
+    --color-blue-text: #1f64a0;
+    --color-green-text: #037147;
+    --color-orange-text: #0b0b4a;
+    --color-red-text: #c3051e;
+    --color-green-mark: #187c50;
+
+    --color-line: rgb(11 11 74 / 0.1);
+    --color-line-strong: rgb(11 11 74 / 0.14);
+    --color-line-active: rgb(11 11 74 / 0.2);
+    --color-line-hover: rgb(11 11 74 / 0.28);
+
+    --shadow-pop: 0 24px 64px rgb(37 37 51 / 0.16);
+    --shadow-float: 0 8px 24px rgb(37 37 51 / 0.12);
+  }
+}
+
+@utility bg-gradient-navy {
+  background-image: var(--gradient-navy);
+}
+
+@utility bg-gradient-orange {
+  background-image: var(--gradient-orange);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-app);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--color-app);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgb(255 149 34 / 0.3);
+    color: var(--color-fg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

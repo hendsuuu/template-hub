@@ -1,50 +1,33 @@
 # template-hub
 
-Dashboard and landing page templates built with Tailwind CSS v4, each ready to use as a boilerplate for **Next.js**, **React (Vite)**, **Astro** or **Laravel**. All the starters of a template share one set of component classes, so it looks and behaves the same whichever framework you pick.
+Next.js templates built with Tailwind CSS v4, dashboards and landing pages, each a standalone app with a dark and a light theme, ready to use as a boilerplate.
 
 ## Templates
 
-| Template | Kind | Starters |
-| --- | --- | --- |
-| **Agent hub** | Dashboard: agents, jobs, a kanban board, schedules | [Next.js](agent-kernel/nextjs) · [React](agent-kernel/react) · [Astro](agent-kernel/astro) · [Laravel](agent-kernel/laravel) |
-
 ### Agent hub
 
-An operations dashboard for AI agents: stat cards with corner brackets, an activity chart, sortable tables that turn into cards on narrow screens, a kanban board, job drawers, schedules with switches, and a collapsible sidebar with a popover menu on phones. Every starter has a `/components` page that shows each component with its classes.
+An operations dashboard for AI agents: stat cards with corner brackets, an activity chart, sortable tables that turn into cards on narrow screens, a kanban board, job drawers, schedules with switches, and a collapsible sidebar with a popover menu on phones.
 
-| Starter | What you get | Run it |
-| --- | --- | --- |
-| [Next.js](agent-kernel/nextjs) | Every page, App Router, nested routes for the job drawers | `npm install`, `npm run dev` |
-| [React (Vite)](agent-kernel/react) | Every page, React Router | `npm install`, `npm run dev` |
-| [Astro](agent-kernel/astro) | The shell, 30 `.astro` components, and the overview, components and sign-in pages | `npm install`, `npm run dev` |
-| [Laravel](agent-kernel/laravel) | The Blade layout, 30 Blade components, and the overview, components and sign-in pages | `composer install`, `npm install`, `npm run build`, `php artisan serve` |
+| Dark | Light |
+| --- | --- |
+| ![Agent hub overview in the dark theme](docs/screenshots/agent-kernel/overview-dark.png) | ![Agent hub overview in the light theme](docs/screenshots/agent-kernel/overview-light.png) |
 
-## Starting a project
-
-Copy a starter into a new folder:
+Every page, with screenshots of both themes: [agent-kernel](agent-kernel/README.md).
 
 ```bash
-npx degit hendsuuu/template-hub/agent-kernel/nextjs my-dashboard
+npx degit hendsuuu/template-hub/agent-kernel my-dashboard
 ```
-
-Swap `nextjs` for `react`, `astro` or `laravel` to start from another framework. Each starter is a standalone project with its own README and commands.
 
 ## How the styles work
 
-- **Design tokens** (`brand.css`): colours, type, radii and shadows as a Tailwind v4 `@theme`. Tailwind's default palette is switched off, so only the tokens exist as utilities (`bg-app`, `bg-panel`, `text-soft`, `text-quiet`, `border-line`, `text-orange`, …). Surfaces are dark navy, orange is the one accent, status colours carry meaning only (green done, blue in progress, orange needs a person, red failed), and Poppins is the typeface.
-- **Component classes** (`agent-kernel.css`): every component as an `ak-*` class inside `@layer components`, so any Tailwind utility still overrides it. The four starters use the same file.
-- **Native interactivity** wherever it can be: the Jobs / Spend switch is a pair of radios read with `:has()`, chart tooltips are `:hover` and `:focus`, the phone menu is a popover, and tables become cards with container queries. Sorting, filtering, the sidebar collapse and dialogs use React in the Next.js and React starters, and one small `ui.js` in Astro and Laravel.
-
-| | Next.js and React | Astro | Laravel |
-| --- | --- | --- | --- |
-| Design tokens | `src/agent-kernel/brand.css` | `src/styles/brand.css` | `resources/css/brand.css` |
-| Component classes | `src/agent-kernel/agent-kernel.css` | `src/styles/agent-kernel.css` | `resources/css/agent-kernel.css` |
-| Behaviour | React components in `src/agent-kernel/` | `public/ui.js` | `public/ui.js` |
-| Mock data | `src/agent-kernel/data/` | `src/data/hub.json` | `resources/data/hub.json` |
+- **Two themes.** `data-theme="dark"` (the default) or `"light"` on `<html>`. Each template has a sun and moon button that switches it and remembers the choice, and a script in `<head>` applies it before the first paint.
+- **Design tokens** (`brand.css`): colours, type, radii and shadows as a Tailwind v4 `@theme`, with a light value for every colour. Tailwind's default palette is switched off, so only the tokens exist as utilities (`bg-app`, `bg-panel`, `text-soft`, `text-quiet`, `border-line`, …). Surfaces are dark navy or white, orange is the one accent, status colours carry meaning only (green done, blue in progress, orange needs a person, red failed), and Poppins is the typeface. Every text colour clears 4.5:1 on every surface in both themes.
+- **Component classes** (`agent-kernel.css`): every component as an `ak-*` class inside `@layer components`, so any Tailwind utility still overrides it. The classes only use the tokens, which is how one set of classes gives both themes.
+- **Native interactivity** wherever it can be: the Jobs / Spend switch is a pair of radios read with `:has()`, chart tooltips are `:hover` and `:focus`, the phone menu is a popover, and tables become cards with container queries. Sorting, filtering, the sidebar collapse and dialogs are React.
 
 ## Maintaining
 
-Each template is built and previewed in a separate workshop, kept outside this repository. The files the starters share (the design tokens, the stylesheet, `ui.js`, the data and the React components) are generated there by `npm run sync:starters`, and `npm run check:starters` fails when a starter has drifted. So change those files in the workshop, sync, then commit here. Everything else in a starter belongs to that starter.
+Each template is built and previewed in a separate workshop, kept outside this repository. The files a starter shares with the workshop (the design tokens, the stylesheet, the data and the components) are generated there by `npm run sync:starters`, and `npm run check:starters` fails when a starter has drifted, so change those files in the workshop, sync, then commit here. The screenshots come from `npm run screenshots -- <template>` in the workshop, run against the starter's production build.
 
 ## Credits
 
