@@ -1,0 +1,18 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+import Icon from "../components/ak/Icon.astro";
+import { buttonClass } from "../lib/buttons";
+import { paths } from "../lib/paths";
+---
+
+<AppLayout title="Page not found" heading="Page not found">
+  <div class="ak-notfound">
+    <div class="ak-notfound__box ak-bracketed">
+      <span class="ak-notfound__icon" aria-hidden="true"><Icon name="compass" size={20} /></span>
+      <p class="ak-notfound__code">404</p>
+      <p class="ak-notfound__title">This page does not exist</p>
+      <p class="ak-notfound__text">The link may be out of date. Everything is still reachable from the menu.</p>
+      <a href={paths.overview()} class={buttonClass("primary", "sm")}>Go to the overview</a>
+    </div>
+  </div>
+</AppLayout>

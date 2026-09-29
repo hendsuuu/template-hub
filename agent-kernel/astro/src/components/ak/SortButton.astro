@@ -1,0 +1,11 @@
+---
+/** A sortable column header's button; ui.js sorts the table when it is pressed. */
+import Icon from "./Icon.astro";
+---
+
+<button type="button" class="ak-sort">
+  <slot />
+  <Icon name="chevrons-up-down" size={12} class="ak-sort__icon ak-sort__icon--none" />
+  <Icon name="chevron-up" size={12} class="ak-sort__icon ak-sort__icon--asc" />
+  <Icon name="chevron-down" size={12} class="ak-sort__icon ak-sort__icon--desc" />
+</button>

@@ -1,0 +1,178 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+import ActivityChart from "../components/ak/ActivityChart.astro";
+import ActivityTable from "../components/ak/ActivityTable.astro";
+import AgentsTable from "../components/ak/AgentsTable.astro";
+import Button from "../components/ak/Button.astro";
+import DayHistogram from "../components/ak/DayHistogram.astro";
+import DeltaPill from "../components/ak/DeltaPill.astro";
+import EmptyState from "../components/ak/EmptyState.astro";
+import Icon from "../components/ak/Icon.astro";
+import IconButton from "../components/ak/IconButton.astro";
+import JobsTable from "../components/ak/JobsTable.astro";
+import MiniBars from "../components/ak/MiniBars.astro";
+import PageHeader from "../components/ak/PageHeader.astro";
+import Panel from "../components/ak/Panel.astro";
+import PeriodChip from "../components/ak/PeriodChip.astro";
+import Pill from "../components/ak/Pill.astro";
+import SearchField from "../components/ak/SearchField.astro";
+import Segmented from "../components/ak/Segmented.astro";
+import SelectField from "../components/ak/SelectField.astro";
+import ShareBreakdown from "../components/ak/ShareBreakdown.astro";
+import StatCard from "../components/ak/StatCard.astro";
+import type { DailyActivity } from "../lib/types";
+import type { MiniBar } from "../lib/ui";
+import { NOW, getHub, getJobCounts, getRecentJobs } from "../lib/data";
+import { firstName, formatDay, formatUsd, percentChange } from "../lib/format";
+import { paths } from "../lib/paths";
+import { AGENT_STATUS, AGENT_STATUS_ORDER, countByStatus, isOnline, sortAgents } from "../lib/status";
+
+const hub = getHub();
+const { agents, activity, spend } = hub;
+const jobs = getJobCounts();
+const name = firstName(hub.user.name);
+const online = agents.filter((a) => isOnline(a.status)).length;
+const working = agents.filter((a) => a.status === "working").length;
+const sum = (values: readonly number[]) => values.reduce((total, n) => total + n, 0);
+const lastWeek = activity.slice(-7);
+const weekBefore = activity.slice(-14, -7);
+const spendChange = weekBefore.length === 7 ? percentChange(sum(lastWeek.map((d) => d.spentUsd)), sum(weekBefore.map((d) => d.spentUsd))) : null;
+
+const agentBars: MiniBar[] = sortAgents(agents)
+  .slice(0, 10)
+  .map((a) => ({ value: isOnline(a.status) ? 1 : 0.35, tone: AGENT_STATUS[a.status].tone, title: `${a.agentId}: ${AGENT_STATUS[a.status].label}` }));
+const dayBars = (value: (d: DailyActivity) => number, tone: MiniBar["tone"], unit: (d: DailyActivity) => string): MiniBar[] =>
+  lastWeek.map((d) => ({ value: value(d), tone, title: `${formatDay(d.day)}: ${unit(d)}` }));
+const roles = Object.fromEntries(agents.map((a) => [a.agentId, a.role]));
+const counts = countByStatus(agents);
+
+const completed = sum(activity.map((d) => d.completed));
+const failed = sum(activity.map((d) => d.failed));
+const needsInput = sum(activity.map((d) => d.needsInput));
+const spent = sum(activity.map((d) => d.spentUsd));
+const recent = getRecentJobs();
+---
+
+<AppLayout title="Overview">
+  <div class="ak-page">
+    <PageHeader title={name ? `Welcome back, ${name}` : "Welcome back"} subtitle="What your agents are doing, and what needs you.">
+      <PeriodChip slot="aside">Last 14 days</PeriodChip>
+    </PageHeader>
+
+    <section aria-label="Summary">
+      <dl class="grid grid-cols-4 gap-3 @max-[880px]:grid-cols-2 @max-[520px]:grid-cols-1 @max-[520px]:gap-2">
+        <StatCard icon="bot" label="Agents online" value={online} suffix={`of ${agents.length}`}>
+          <MiniBars slot="chart" bars={agentBars} max={1} history={false} />
+          <Fragment slot="meta">
+            {
+              online === agents.length ? (
+                <>
+                  <Pill tone="green">All online</Pill>
+                  <span>seen in the last {hub.onlineSeconds} s</span>
+                </>
+              ) : (
+                <>
+                  <Pill>{agents.length - online} not online</Pill>
+                  <span>{agents.length} registered</span>
+                </>
+              )
+            }
+          </Fragment>
+        </StatCard>
+        <StatCard icon="activity" label="Working now" value={working}>
+          <MiniBars slot="chart" bars={dayBars((d) => d.completed + d.failed, "green", (d) => `${d.completed + d.failed} finished`)} />
+          <Fragment slot="meta">
+            <Pill tone="blue">{jobs.queued} queued</Pill>
+            <span>waiting for pickup</span>
+          </Fragment>
+        </StatCard>
+        <StatCard icon="hand" label="Waiting for you" value={jobs.waiting} attention={jobs.waiting > 0}>
+          <MiniBars slot="chart" bars={dayBars((d) => d.needsInput, "orange", (d) => `${d.needsInput} needed a person`)} />
+          <Fragment slot="meta">
+            {
+              jobs.waiting > 0 ? (
+                <>
+                  <Pill tone="orange">Needs you</Pill>
+                  <a href={paths.boardWaiting()} class="ak-stat__meta-link">
+                    See what is waiting
+                  </a>
+                </>
+              ) : (
+                <>
+                  <Pill tone="green">All clear</Pill>
+                  <span>nothing is waiting</span>
+                </>
+              )
+            }
+          </Fragment>
+        </StatCard>
+        <StatCard icon="wallet" label="Spend (7 days)" value={formatUsd(spend.last7dUsd)}>
+          <DeltaPill slot="corner" change={spendChange} against="the 7 days before" />
+          <MiniBars slot="chart" bars={dayBars((d) => d.spentUsd, "blue", (d) => formatUsd(d.spentUsd))} />
+          <span slot="meta">Last 24 h: <span class="ak-stat__meta-value">{formatUsd(spend.last24hUsd)}</span></span>
+        </StatCard>
+      </dl>
+    </section>
+
+    <div class="grid grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-3 @max-[880px]:grid-cols-1">
+      <Panel title="Activity" class="ak-activity" id="activity">
+        <Fragment slot="subtitle">
+          <span data-ak-mode="jobs">Jobs finished per day, last 14 days (UTC)</span>
+          <span data-ak-mode="spend">Known model spend per day, last 14 days (UTC)</span>
+        </Fragment>
+        <Segmented
+          slot="actions"
+          label="Show"
+          name="ak-activity-mode"
+          defaultValue="jobs"
+          options={[
+            { value: "jobs", label: "Jobs" },
+            { value: "spend", label: "Spend" },
+          ]}
+        />
+        <div class="ak-headline" data-ak-mode="jobs">
+          <p class="ak-big-number">{completed + failed} <span class="ak-big-number__unit">finished</span></p>
+          <ul class="ak-legend" aria-label="Key">
+            <li><span class="ak-swatch ak-swatch--green" aria-hidden="true"></span>Completed <span class="ak-legend__value">{completed}</span></li>
+            <li><span class="ak-swatch ak-swatch--red" aria-hidden="true"></span>Failed <span class="ak-legend__value">{failed}</span></li>
+            <li><span class="ak-swatch ak-swatch--ring" aria-hidden="true"></span>Needed a person <span class="ak-legend__value">{needsInput}</span></li>
+          </ul>
+        </div>
+        <div class="ak-headline" data-ak-mode="spend">
+          <p class="ak-big-number">{formatUsd(spent)}</p>
+          <p class="ak-headline__side">About <span class="ak-legend__value">{formatUsd(activity.length ? spent / activity.length : 0)}</span> a day</p>
+        </div>
+        <ActivityChart days={activity} mode="jobs" />
+        <ActivityChart days={activity} mode="spend" />
+        <ActivityTable days={activity} />
+      </Panel>
+
+      <Panel title="Work by agent" subtitle="Share of jobs started, last 7 days" inline id="work-by-agent">
+        <span slot="actions" class="ak-total">{sum(hub.workByAgent.map((s) => s.jobs))} jobs</span>
+        <div class="flex flex-col gap-5">
+          <DayHistogram days={activity} highlightLast={7} />
+          <ShareBreakdown items={hub.workByAgent} roles={roles} />
+        </div>
+      </Panel>
+    </div>
+
+    <Panel title="Agents" subtitle={`${agents.length} registered · ${online} online`} flush id="agents-panel">
+      <Fragment slot="actions">
+        <SearchField label="Search agents" target="#agents" />
+        <SelectField label="Show agents by status" filter="status" target="#agents">
+          <option value="">Any status</option>
+          {AGENT_STATUS_ORDER.map((s) => <option value={s}>{AGENT_STATUS[s].label} ({counts[s]})</option>)}
+        </SelectField>
+        <IconButton label="Refresh agents" icon="refresh-cw" />
+        <IconButton label="Open the agents page" icon="arrow-up-right" href={paths.agents()} />
+      </Fragment>
+      <AgentsTable id="agents" agents={agents} now={NOW} caption="Agents and what each is doing now" />
+      <EmptyState bare icon="search-x" title="No agents match" text="Try another status or search." emptyFor="#agents" />
+    </Panel>
+
+    <Panel title="Recent jobs" subtitle="The latest updates" flush id="recent-jobs">
+      <Button slot="actions" variant="secondary" size="sm" href={paths.jobs()}>All jobs <Icon name="arrow-right" size={14} /></Button>
+      <JobsTable id="recent" jobs={recent} now={NOW} caption="Recently updated jobs" compact />
+    </Panel>
+  </div>
+</AppLayout>

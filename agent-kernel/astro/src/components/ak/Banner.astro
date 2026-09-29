@@ -1,0 +1,9 @@
+---
+import Icon from "./Icon.astro";
+---
+
+<div class="ak-banner">
+  <Icon name="triangle-alert" size={18} />
+  <p class="flex-[1_1_220px]"><slot /></p>
+  <slot name="action" />
+</div>

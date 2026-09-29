@@ -1,0 +1,95 @@
+---
+/**
+ * The Lucide icons the template uses, by name. Add an import and an entry to
+ * use another one: https://lucide.dev/icons
+ */
+import {
+  Activity,
+  ArrowRight,
+  ArrowUpRight,
+  Ban,
+  Bell,
+  Blocks,
+  Bot,
+  CalendarClock,
+  CalendarDays,
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  Compass,
+  Download,
+  Hand,
+  Inbox,
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Play,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  SearchX,
+  Settings,
+  SquareKanban,
+  TriangleAlert,
+  Users,
+  Wallet,
+  Waypoints,
+  X,
+} from "@lucide/astro";
+
+const ICONS = {
+  activity: Activity,
+  "arrow-right": ArrowRight,
+  "arrow-up-right": ArrowUpRight,
+  ban: Ban,
+  bell: Bell,
+  blocks: Blocks,
+  bot: Bot,
+  "calendar-clock": CalendarClock,
+  "calendar-days": CalendarDays,
+  "chevron-down": ChevronDown,
+  "chevron-up": ChevronUp,
+  "chevrons-up-down": ChevronsUpDown,
+  compass: Compass,
+  download: Download,
+  hand: Hand,
+  inbox: Inbox,
+  "layout-dashboard": LayoutDashboard,
+  "list-checks": ListChecks,
+  "log-out": LogOut,
+  menu: Menu,
+  "panel-left-close": PanelLeftClose,
+  "panel-left-open": PanelLeftOpen,
+  play: Play,
+  plus: Plus,
+  "refresh-cw": RefreshCw,
+  "rotate-ccw": RotateCcw,
+  search: Search,
+  "search-x": SearchX,
+  settings: Settings,
+  "square-kanban": SquareKanban,
+  "triangle-alert": TriangleAlert,
+  users: Users,
+  wallet: Wallet,
+  waypoints: Waypoints,
+  x: X,
+} as const;
+
+export type IconName = keyof typeof ICONS;
+
+interface Props {
+  name: IconName;
+  size?: number;
+  class?: string;
+  strokeWidth?: number;
+}
+
+const { name, size = 16, class: className, strokeWidth } = Astro.props;
+const Component = ICONS[name];
+---
+
+<Component size={size} class={className} stroke-width={strokeWidth} aria-hidden="true" />

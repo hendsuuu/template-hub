@@ -1,0 +1,26 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { buttonClass, type ButtonVariant } from "../../lib/buttons";
+
+type Props = (HTMLAttributes<"button"> | HTMLAttributes<"a">) & {
+  variant?: ButtonVariant;
+  size?: "md" | "sm";
+  /** Renders a link that looks like a button. */
+  href?: string;
+};
+
+const { variant = "primary", size = "md", href, class: className, ...rest } = Astro.props;
+const classes = [buttonClass(variant, size), className];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...(rest as HTMLAttributes<"a">)}>
+      <slot />
+    </a>
+  ) : (
+    <button type="button" class:list={classes} {...(rest as HTMLAttributes<"button">)}>
+      <slot />
+    </button>
+  )
+}

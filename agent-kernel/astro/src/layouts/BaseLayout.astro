@@ -1,0 +1,35 @@
+---
+/** The document: fonts, the stylesheet, the sidebar restore script and ui.js. */
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/500.css";
+import "@fontsource/poppins/600.css";
+import "@fontsource/poppins/700.css";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Operations dashboard: agents, jobs, a kanban board and schedules." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#252533" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <!-- Restores a collapsed sidebar before the first paint. -->
+    <script is:inline>
+      try{if(localStorage.getItem("ak:sidebar")==="collapsed")document.documentElement.dataset.akSidebar="collapsed"}catch(e){}
+    </script>
+    <script is:inline src="/ui.js" defer></script>
+  </head>
+  <body>
+    <div class="ak-root"><slot /></div>
+  </body>
+</html>

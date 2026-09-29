@@ -1,0 +1,26 @@
+---
+/** A tiny bar chart. With `history`, earlier bars are quieter than the last (the current period). */
+import type { MiniBar } from "../../lib/ui";
+import { cssVars, percent } from "../../lib/style";
+
+interface Props {
+  bars: readonly MiniBar[];
+  max?: number;
+  history?: boolean;
+}
+
+const { bars, max, history = true } = Astro.props;
+const top = Math.max(max ?? 0, ...bars.map((b) => b.value), 1);
+---
+
+<span class:list={["ak-minibars", history && "ak-minibars--history"]} aria-hidden="true">
+  {
+    bars.map((bar) => (
+      <span
+        class:list={["ak-minibars__bar", `ak-minibars__bar--${bar.tone}`, bar.value === 0 && "ak-minibars__bar--zero"]}
+        style={cssVars({ "--h": percent(bar.value, top) })}
+        title={bar.title}
+      />
+    ))
+  }
+</span>

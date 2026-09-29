@@ -1,0 +1,43 @@
+---
+/**
+ * The signed-in shell: sidebar (collapsible to icons above 900px, a popover
+ * drawer below), the top bar and the page. The drawer needs no script to open:
+ * the menu button is its popover target.
+ */
+import Sidebar from "../components/ak/Sidebar.astro";
+import TopBar from "../components/ak/TopBar.astro";
+import { NOW, getAgents, getHub, getJobCounts } from "../lib/data";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  /** The tab title, before " · Agent hub". */
+  title: string;
+  /** The top bar's title, for pages outside the navigation. */
+  heading?: string;
+}
+
+const { title, heading } = Astro.props;
+const hub = getHub();
+const agents = getAgents();
+---
+
+<BaseLayout title={`${title} · Agent hub`}>
+  <div class="ak-shell">
+    <a href="#main" class="ak-skip">Skip to content</a>
+
+    <aside class="ak-shell__sidebar" aria-label="Sidebar">
+      <Sidebar mode="rail" agents={agents} user={hub.user} tenantName={hub.tenant.name} />
+    </aside>
+
+    <div id="ak-nav-drawer" popover="auto" class="ak-nav-drawer" aria-label="Menu">
+      <Sidebar mode="drawer" agents={agents} user={hub.user} tenantName={hub.tenant.name} />
+    </div>
+
+    <div class="ak-shell__column">
+      <TopBar user={hub.user} updatedAt={NOW} waiting={getJobCounts().waiting} title={heading} />
+      <main id="main" tabindex="-1" class="ak-shell__content">
+        <slot />
+      </main>
+    </div>
+  </div>
+</BaseLayout>

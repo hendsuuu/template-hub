@@ -1,0 +1,15 @@
+---
+/** An on/off switch; ui.js flips it. */
+interface Props {
+  checked: boolean;
+  /** What is switched, e.g. "Monday lead review". */
+  label: string;
+}
+
+const { checked, label } = Astro.props;
+---
+
+<button type="button" role="switch" aria-checked={String(checked)} aria-label={label} class="ak-switch">
+  <span class="ak-switch__track" aria-hidden="true"><span class="ak-switch__thumb"></span></span>
+  <span class="ak-switch__text" aria-hidden="true"><span class="ak-switch__on">On</span><span class="ak-switch__off">Off</span></span>
+</button>

@@ -1,0 +1,39 @@
+---
+/** The chart's numbers as a table, for screen readers (a hidden block, so it never widens a phone page). */
+import type { DailyActivity } from "../../lib/types";
+import { formatDayLong, formatUsd } from "../../lib/format";
+
+interface Props {
+  days: readonly DailyActivity[];
+}
+
+const { days } = Astro.props;
+---
+
+<div class="sr-only">
+  <table>
+    <caption>Activity by day, last 14 days (UTC)</caption>
+    <thead>
+      <tr>
+        <th scope="col">Day</th>
+        <th scope="col">Completed</th>
+        <th scope="col">Failed</th>
+        <th scope="col">Needed a person</th>
+        <th scope="col">Spent</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        days.map((day) => (
+          <tr>
+            <th scope="row">{formatDayLong(day.day)}</th>
+            <td>{day.completed}</td>
+            <td>{day.failed}</td>
+            <td>{day.needsInput}</td>
+            <td>{formatUsd(day.spentUsd)}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

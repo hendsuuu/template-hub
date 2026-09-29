@@ -1,0 +1,111 @@
+---
+/**
+ * The sidebar, as the desktop rail (collapsible to icons; ui.js keeps the
+ * choice) or as the phone menu inside the popover drawer.
+ */
+import type { AgentSummary, DashboardUser } from "../../lib/types";
+import { initials } from "../../lib/format";
+import { NAV, isActive } from "../../lib/nav";
+import { paths } from "../../lib/paths";
+import { AGENT_STATUS } from "../../lib/status";
+import AgentAvatar from "./AgentAvatar.astro";
+import Icon from "./Icon.astro";
+import StatusDot from "./StatusDot.astro";
+
+interface Props {
+  mode: "rail" | "drawer";
+  agents: readonly AgentSummary[];
+  user: DashboardUser;
+  tenantName: string;
+}
+
+const { mode, agents, user, tenantName } = Astro.props;
+const pathname = Astro.url.pathname;
+const onBoard = pathname === paths.board() || pathname.startsWith(`${paths.board()}/`);
+const current = onBoard ? Astro.url.searchParams.get("agent") : null;
+const sorted = [...agents].sort((a, b) => a.agentId.localeCompare(b.agentId));
+---
+
+<div class="ak-sidebar">
+  <div class="ak-sidebar__brand">
+    <a href={paths.overview()} class="ak-sidebar__product">
+      {/* Placeholder mark: put your approved logo here, at the same size. */}
+      <span class="ak-sidebar__mark" aria-hidden="true"><Icon name="waypoints" /></span>
+      Agent hub
+    </a>
+    {
+      mode === "drawer" ? (
+        <button type="button" class="ak-sidebar__toggle" popovertarget="ak-nav-drawer" popovertargetaction="hide" aria-label="Close menu" title="Close menu">
+          <Icon name="x" size={18} />
+        </button>
+      ) : (
+        <button type="button" class="ak-sidebar__toggle" data-ak-sidebar-toggle aria-label="Collapse the sidebar" title="Collapse the sidebar" aria-pressed="false">
+          <Icon name="panel-left-close" size={18} class="ak-sidebar__toggle-close" />
+          <Icon name="panel-left-open" size={18} class="ak-sidebar__toggle-open" />
+        </button>
+      )
+    }
+  </div>
+
+  <div class="ak-sidebar__scroll">
+    <nav aria-label="Main" class="ak-sidebar__nav">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a href={item.href} class="ak-navlink" aria-current={isActive(item, pathname) ? "page" : undefined}>
+                <Icon name={item.icon} size={17} />
+                <span class="ak-navlink__label">{item.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <details class="ak-sidebar__agents" open>
+      <summary class="ak-sidebar__section-toggle">
+        <Icon name="users" size={17} />
+        <span class="ak-navlink__label">Agents</span>
+        <Icon name="chevron-down" size={15} class="ak-sidebar__chevron" />
+      </summary>
+      <ul class="ak-sidebar__agent-list">
+        {
+          sorted.map((agent) => (
+            <li>
+              <a
+                href={paths.board(agent.agentId)}
+                class="ak-agentlink"
+                aria-current={current === agent.agentId ? "page" : undefined}
+                title={`${agent.agentId}: ${AGENT_STATUS[agent.status].label}`}
+              >
+                <span class="ak-agentlink__avatar">
+                  <AgentAvatar size="sm" />
+                  <StatusDot status={agent.status} />
+                </span>
+                <span class="ak-navlink__label">{agent.agentId}</span>
+                <span class="sr-only">, {AGENT_STATUS[agent.status].label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </details>
+  </div>
+
+  <div class="ak-sidebar__account">
+    <div class="ak-sidebar__user">
+      <span class="ak-avatar" aria-hidden="true">{initials(user.name)}</span>
+      <div class="ak-sidebar__user-text">
+        <p class="ak-sidebar__user-name">{user.name}</p>
+        <p class="ak-sidebar__user-email">{user.email}</p>
+      </div>
+      <span class:list={["ak-sidebar__role", user.role === "admin" && "ak-sidebar__role--admin"]}>{user.role === "admin" ? "Admin" : "Viewer"}</span>
+    </div>
+    <a href={paths.login()} class="ak-sidebar__signout">
+      <Icon name="log-out" size={17} />
+      <span class="ak-navlink__label">Sign out</span>
+    </a>
+    <p class="ak-sidebar__footer">{tenantName}</p>
+  </div>
+</div>

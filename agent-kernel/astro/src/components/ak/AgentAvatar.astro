@@ -1,0 +1,13 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  size?: "sm" | "md";
+}
+
+const { size = "md" } = Astro.props;
+---
+
+<span class:list={["ak-agent-avatar", size === "sm" && "ak-agent-avatar--sm"]} aria-hidden="true">
+  <Icon name="bot" size={size === "sm" ? 14 : 16} />
+</span>

@@ -1,0 +1,106 @@
+---
+/**
+ * Fourteen days as columns: completed (green) with failed (red) stacked on top
+ * and a ring above for jobs that needed a person; or spend (blue). Built from
+ * HTML so it renders the same in every framework: hover or focus a day to read
+ * its numbers.
+ */
+import type { DailyActivity } from "../../lib/types";
+import { niceScale } from "../../lib/chart";
+import { formatDay, formatDayLong, formatUsd, formatUsdTick } from "../../lib/format";
+import { cssVars, percent } from "../../lib/style";
+
+interface Props {
+  days: readonly DailyActivity[];
+  mode: "jobs" | "spend";
+}
+
+const { days, mode } = Astro.props;
+const CHAR = 6.6;
+const values = days.map((d) => (mode === "jobs" ? d.completed + d.failed : d.spentUsd));
+const scale = niceScale(Math.max(0, ...values), { integer: mode === "jobs" });
+const tickText = scale.ticks.map((t) => (mode === "jobs" ? String(t) : formatUsdTick(t)));
+const axis = Math.ceil(Math.max(...tickText.map((t) => t.length)) * CHAR) + 12;
+const empty = values.every((v) => v === 0);
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const describe = (day: DailyActivity) =>
+  `${formatDayLong(day.day)}: ${day.completed} completed, ${day.failed} failed, ${plural(day.needsInput, "job", "jobs")} needed a person, ${formatUsd(day.spentUsd)} spent.`;
+---
+
+<div
+  class="ak-chart"
+  data-ak-mode={mode}
+  role="group"
+  aria-label={mode === "jobs" ? "Jobs per day, last 14 days" : "Spend per day, last 14 days"}
+  style={cssVars({ "--ak-axis": `${axis}px` })}
+>
+  <div class="ak-chart__plot">
+    <div class="ak-chart__grid" aria-hidden="true">
+      {
+        scale.ticks.map((tick, index) => (
+          <div class="ak-chart__gridline" style={cssVars({ "--y": percent(tick, scale.max) })}>
+            <span class="ak-chart__tick">{tickText[index]}</span>
+          </div>
+        ))
+      }
+    </div>
+    <ol class="ak-chart__days">
+      {
+        days.map((day, index) => {
+          const total = day.completed + day.failed;
+          return (
+            <li class="ak-chart__day" tabindex="0" aria-label={describe(day)}>
+              <span class="ak-chart__stack" aria-hidden="true">
+                {mode === "jobs" ? (
+                  total === 0 ? (
+                    <span class="ak-chart__bar ak-chart__bar--zero" />
+                  ) : (
+                    <>
+                      {day.completed > 0 && (
+                        <span class="ak-chart__bar ak-chart__bar--completed" style={cssVars({ "--h": percent(day.completed, scale.max) })} />
+                      )}
+                      {day.failed > 0 && <span class="ak-chart__bar ak-chart__bar--failed" style={cssVars({ "--h": percent(day.failed, scale.max) })} />}
+                    </>
+                  )
+                ) : day.spentUsd > 0 ? (
+                  <span class="ak-chart__bar ak-chart__bar--spend" style={cssVars({ "--h": percent(day.spentUsd, scale.max) })} />
+                ) : (
+                  <span class="ak-chart__bar ak-chart__bar--zero" />
+                )}
+              </span>
+              {mode === "jobs" && day.needsInput > 0 && (
+                <span class="ak-chart__marker" aria-hidden="true" style={cssVars({ "--h": percent(total, scale.max) })} />
+              )}
+              <span class="ak-chart__label" aria-hidden="true">
+                {formatDay(day.day)}
+              </span>
+              <div class:list={["ak-chart__tooltip", index < days.length / 2 ? "ak-chart__tooltip--right" : "ak-chart__tooltip--left"]} aria-hidden="true">
+                <p class="ak-tooltip__day">{formatDayLong(day.day)}</p>
+                <dl class="ak-tooltip__rows">
+                  <div class="ak-tooltip__row">
+                    <dt><span class="ak-key ak-key--green" />Completed</dt>
+                    <dd>{day.completed}</dd>
+                  </div>
+                  <div class="ak-tooltip__row">
+                    <dt><span class="ak-key ak-key--red" />Failed</dt>
+                    <dd>{day.failed}</dd>
+                  </div>
+                  <div class="ak-tooltip__row">
+                    <dt><span class="ak-key ak-key--ring" />Needed a person</dt>
+                    <dd>{day.needsInput}</dd>
+                  </div>
+                  <div class="ak-tooltip__row">
+                    <dt><span class="ak-key ak-key--blue" />Spent</dt>
+                    <dd>{formatUsd(day.spentUsd)}</dd>
+                  </div>
+                </dl>
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+    {empty && <p class="ak-chart__empty">No activity in the last 14 days.</p>}
+  </div>
+  <div class="ak-chart__axis-space" aria-hidden="true"></div>
+</div>
